@@ -4,6 +4,7 @@
 [![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)](LICENSE)
 [![Status](https://img.shields.io/badge/Status-Completed-brightgreen?style=for-the-badge)]()
 [![Dataset](https://img.shields.io/badge/Dataset-50k%20records-blue?style=for-the-badge)]()
+[![PDF](https://img.shields.io/badge/Download-PDF%20Report-red?style=for-the-badge&logo=adobe-acrobat-reader)](./Student%20Health_Dashboard.pdf)
 
 > **A comprehensive student health analytics dashboard developed using Microsoft Power BI Desktop to analyze behavioral, physical, mental, and academic health indicators from 50,000 student health records.**
 
