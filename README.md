@@ -1,4 +1,9 @@
-# my-powerbi-project
+# 🩺 Student Health Analytics Dashboard
+
+[![Power BI](https://img.shields.io/badge/Power%20BI-F2C811?style=for-the-badge&logo=power-bi&logoColor=black)](https://powerbi.microsoft.com/)
+[![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)](LICENSE)
+[![Status](https://img.shields.io/badge/Status-Completed-brightgreen?style=for-the-badge)]()
+[![Dataset](https://img.shields.io/badge/Dataset-50k%20records-blue?style=for-the-badge)]()
 
 > **A comprehensive student health analytics dashboard developed using Microsoft Power BI Desktop to analyze behavioral, physical, mental, and academic health indicators from 50,000 student health records.**
 
