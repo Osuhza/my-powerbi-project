@@ -1,0 +1,1297 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Student Health Analytics Dashboard</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,300&display=swap"
+    rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #0b0f1a;
+      --surface: #111827;
+      --surface2: #1a2235;
+      --border: #1e2d45;
+      --accent: #3b82f6;
+      --accent2: #10b981;
+      --accent3: #f59e0b;
+      --danger: #ef4444;
+      --text: #e2e8f0;
+      --muted: #64748b;
+      --heading-font: 'DM Sans', sans-serif;
+      --body-font: 'DM Sans', sans-serif;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { font-size: 17px; scroll-behavior: smooth; }
+    body { background: var(--bg); color: var(--text); font-family: var(--body-font); font-size: 16px; line-height: 1.6; overflow-x: hidden; }
+
+    /* NAV */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      background: rgba(11,15,26,0.88); backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border);
+      padding: 0 2rem; display: flex; align-items: center; justify-content: space-between; height: 60px;
+    }
+    .nav-brand { font-family: var(--heading-font); font-weight: 800; font-size: 0.92rem; color: var(--accent); text-decoration: none; }
+    .nav-links { display: flex; gap: 1.4rem; list-style: none; }
+    .nav-links a { font-size: 0.72rem; font-weight: 500; color: var(--muted); text-decoration: none; letter-spacing: 0.02em; text-transform: uppercase; transition: color 0.2s; }
+    .nav-links a:hover { color: var(--text); }
+
+    /* HERO */
+    .hero { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 100px 2rem 60px; position: relative; overflow: hidden; text-align: center; }
+    .hero::before { content:''; position:absolute; inset:0; background: radial-gradient(ellipse 80% 60% at 50% 0%, rgba(59,130,246,0.12) 0%, transparent 70%), radial-gradient(ellipse 60% 40% at 80% 80%, rgba(16,185,129,0.07) 0%, transparent 60%); pointer-events:none; }
+    .hero-grid-bg { position:absolute; inset:0; background-image: linear-gradient(rgba(30,45,69,0.35) 1px,transparent 1px), linear-gradient(90deg,rgba(30,45,69,0.35) 1px,transparent 1px); background-size:40px 40px; pointer-events:none; }
+    .hero-inner { position:relative; max-width:860px; }
+    .hero-badge { display:inline-flex; align-items:center; gap:0.5rem; background:rgba(59,130,246,0.1); border:1px solid rgba(59,130,246,0.25); border-radius:100px; padding:0.35rem 1rem; font-size:0.72rem; font-weight:500; color:var(--accent); letter-spacing:0.03em; text-transform:uppercase; margin-bottom:1.8rem; animation:fadeUp 0.7s ease both; }
+    .hero h1 { font-family:var(--heading-font); font-weight:800; font-size:clamp(2rem,5vw,3.4rem); line-height:1.08; animation:fadeUp 0.7s 0.1s ease both; }
+    .hero h1 span { color:var(--accent); }
+    .hero-sub { margin-top:1.4rem; font-size:0.96rem; color:var(--muted); font-weight:300; max-width:620px; margin-inline:auto; animation:fadeUp 0.7s 0.2s ease both; }
+    .hero-meta { margin-top:2.8rem; display:flex; flex-wrap:wrap; gap:0.8rem; justify-content:center; animation:fadeUp 0.7s 0.3s ease both; }
+    .badge { display:inline-flex; align-items:center; gap:0.4rem; padding:0.4rem 0.9rem; border-radius:6px; font-size:0.74rem; font-weight:500; border:1px solid; }
+    .badge-blue { background:rgba(59,130,246,0.1); border-color:rgba(59,130,246,0.3); color:#93c5fd; }
+    .badge-green { background:rgba(16,185,129,0.1); border-color:rgba(16,185,129,0.3); color:#6ee7b7; }
+    .badge-amber { background:rgba(245,158,11,0.1); border-color:rgba(245,158,11,0.3); color:#fcd34d; }
+    .badge-purple { background:rgba(139,92,246,0.1); border-color:rgba(139,92,246,0.3); color:#c4b5fd; }
+    .hero-cta { margin-top:2.8rem; display:flex; gap:1rem; justify-content:center; flex-wrap:wrap; animation:fadeUp 0.7s 0.4s ease both; }
+    .btn { display:inline-flex; align-items:center; gap:0.5rem; padding:0.75rem 1.6rem; border-radius:8px; font-family:var(--body-font); font-size:0.84rem; font-weight:500; cursor:pointer; text-decoration:none; transition:all 0.2s; border:1px solid transparent; }
+    .btn-primary { background:var(--accent); color:#fff; }
+    .btn-primary:hover { background:#2563eb; transform:translateY(-1px); }
+    .btn-outline { background:transparent; border-color:var(--border); color:var(--text); }
+    .btn-outline:hover { border-color:var(--accent); color:var(--accent); }
+
+    /* SECTION SHELL */
+    section { padding: 80px 2rem; max-width: 1100px; margin: 0 auto; }
+    .section-tag { display:inline-flex; align-items:center; gap:0.5rem; font-size:0.7rem; font-weight:600; letter-spacing:0.05em; text-transform:uppercase; color:var(--accent); margin-bottom:0.8rem; }
+    .section-tag::before { content:''; width:20px; height:2px; background:var(--accent); border-radius:2px; }
+    h2 { font-family:var(--heading-font); font-weight:800; font-size:clamp(1.55rem,3.2vw,2.2rem); letter-spacing:0; line-height:1.15; margin-bottom:0.8rem; }
+    .section-lead { color:var(--muted); font-size:0.92rem; max-width:920px; line-height:1.7; margin-bottom:3rem; }
+    .divider { height:1px; background:linear-gradient(90deg,transparent,var(--border),transparent); max-width:1100px; margin:0 auto; }
+
+    /* STAT CARDS */
+    .stat-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:1.2rem; margin-bottom:3rem; }
+    .stat-card { background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:1.5rem; position:relative; overflow:hidden; transition:border-color 0.25s,transform 0.25s; }
+    .stat-card:hover { border-color:var(--accent); transform:translateY(-2px); }
+    .stat-card::after { content:''; position:absolute; top:0; left:0; right:0; height:3px; border-radius:12px 12px 0 0; }
+    .stat-card.green::after { background:var(--accent2); }
+    .stat-card.amber::after { background:var(--accent3); }
+    .stat-card.red::after { background:var(--danger); }
+    .stat-card.blue::after { background:var(--accent); }
+    .stat-label { font-size:0.7rem; color:var(--muted); text-transform:uppercase; letter-spacing:0.04em; margin-bottom:0.5rem; }
+    .stat-value { font-family:var(--heading-font); font-size:1.9rem; font-weight:800; }
+    .stat-sub { font-size:0.76rem; color:var(--muted); margin-top:0.3rem; }
+    .stat-card.green .stat-value { color:var(--accent2); }
+    .stat-card.amber .stat-value { color:var(--accent3); }
+    .stat-card.red .stat-value { color:var(--danger); }
+    .stat-card.blue .stat-value { color:var(--accent); }
+
+    /* INFO BOX */
+    .info-box { background:rgba(59,130,246,0.06); border:1px solid rgba(59,130,246,0.2); border-radius:10px; padding:1rem 1.4rem; font-size:0.84rem; color:#93c5fd; display:flex; gap:0.8rem; align-items:flex-start; margin-bottom:2rem; }
+
+    /* TABLE */
+    .table-wrap { overflow-x:auto; margin:1.5rem 0; border-radius:10px; border:1px solid var(--border); }
+    table { width:100%; border-collapse:collapse; font-size:0.82rem; }
+    thead tr { background:var(--surface2); }
+    th { padding:0.85rem 1.1rem; text-align:left; font-weight:600; font-size:0.7rem; text-transform:uppercase; letter-spacing:0.04em; color:var(--muted); border-bottom:1px solid var(--border); }
+    td { padding:0.8rem 1.1rem; border-bottom:1px solid var(--border); color:var(--text); }
+    tr:last-child td { border-bottom:none; }
+    tbody tr:hover { background:rgba(255,255,255,0.02); }
+    td code { background:rgba(59,130,246,0.12); color:#93c5fd; padding:0.1rem 0.4rem; border-radius:4px; font-size:0.76rem; font-family:'Fira Code',monospace; }
+
+    /* STEP CARDS */
+    .step-grid { display:grid; gap:1.2rem; }
+    .step-card { background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:1.6rem; display:grid; grid-template-columns:48px 1fr; gap:1.2rem; align-items:start; transition:border-color 0.25s; }
+    .step-card:hover { border-color:var(--accent); }
+    .step-num { width:48px; height:48px; border-radius:10px; background:rgba(59,130,246,0.1); border:1px solid rgba(59,130,246,0.25); display:flex; align-items:center; justify-content:center; font-family:var(--heading-font); font-weight:800; font-size:0.9rem; color:var(--accent); flex-shrink:0; }
+    .step-content h3 { font-family:var(--heading-font); font-size:0.92rem; font-weight:700; margin-bottom:0.4rem; }
+    .step-content p { font-size:0.82rem; color:var(--muted); line-height:1.55; }
+    ul.bullet-list { list-style:none; margin-top:0.6rem; display:flex; flex-direction:column; gap:0.3rem; }
+    ul.bullet-list li { font-size:0.8rem; color:var(--muted); padding-left:1.2rem; position:relative; }
+    ul.bullet-list li::before { content:'→'; position:absolute; left:0; color:var(--accent); font-size:0.74rem; }
+
+    /* CODE BLOCK */
+    .code-block { background:#0d1117; border:1px solid var(--border); border-radius:10px; padding:1.2rem 1.4rem; font-family:'Courier New',monospace; font-size:0.76rem; color:#c9d1d9; overflow-x:auto; margin:1rem 0; line-height:1.7; }
+    .code-block .kw { color:#ff7b72; }
+    .code-block .fn { color:#d2a8ff; }
+    .code-block .str { color:#a5d6ff; }
+    .code-block .cm { color:#8b949e; }
+
+    /* IMAGE PLACEHOLDER */
+    .img-placeholder { width:100%; aspect-ratio:16/9; background:var(--surface2); border:2px dashed var(--border); border-radius:12px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:0.6rem; color:var(--muted); font-size:0.78rem; margin:1.2rem 0; transition:border-color 0.2s; cursor:pointer; position:relative; overflow:hidden; }
+    .img-placeholder:hover { border-color:var(--accent); }
+    .img-placeholder:has(img) { padding:0; gap:0; border-style:solid; }
+    .img-placeholder img { width:100%; height:100%; object-fit:contain; display:block; background:var(--bg); border-radius:10px; }
+    .img-placeholder:has(img) .ph-icon, .img-placeholder:has(img) span, .img-placeholder:has(img) p { display:none; }
+    .img-placeholder .ph-icon { width:48px; height:48px; background:rgba(59,130,246,0.08); border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:1.25rem; }
+    .img-placeholder span { color:var(--accent); font-size:0.72rem; font-weight:500; }
+
+    /* SCHEMA */
+    .schema-grid { display:grid; grid-template-columns:1fr 2fr; gap:2rem; align-items:start; }
+    .schema-fact { background:rgba(59,130,246,0.08); border:1.5px solid rgba(59,130,246,0.3); border-radius:12px; padding:1.2rem; }
+    .schema-fact h4 { font-family:var(--heading-font); font-size:0.78rem; font-weight:700; color:var(--accent); margin-bottom:0.8rem; text-transform:uppercase; letter-spacing:0.04em; }
+    .schema-dims { display:grid; grid-template-columns:1fr 1fr; gap:0.8rem; }
+    .schema-dim { background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:0.9rem 1rem; }
+    .schema-dim h4 { font-family:var(--heading-font); font-size:0.74rem; font-weight:700; color:var(--accent2); margin-bottom:0.4rem; text-transform:uppercase; letter-spacing:0.04em; }
+    .schema-dim p { font-size:0.74rem; color:var(--muted); }
+
+    /* EDA METRICS */
+    .metrics-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:1rem; }
+    @media(min-width:900px){ .metrics-grid { grid-template-columns:repeat(4,minmax(0,1fr)); } }
+    .metric-card { background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:1.1rem 1.2rem; transition:border-color 0.2s; }
+    .metric-card:hover { border-color:var(--accent2); }
+    .metric-name { font-size:0.76rem; color:var(--muted); text-transform:uppercase; letter-spacing:0.04em; }
+    .metric-val { font-family:var(--heading-font); font-size:1.5rem; font-weight:800; color:var(--text); margin:0.3rem 0 0.1rem; }
+    .metric-range { font-size:0.8rem; color:var(--muted); }
+
+    /* FINDING CARDS */
+    .finding-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:1.2rem; }
+    @media(min-width:768px){ .finding-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } }
+    .finding-card { background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:1.4rem; }
+    .finding-icon { font-size:1.7rem; margin-bottom:0.8rem; }
+    .finding-card h4 { font-family:var(--heading-font); font-size:0.98rem; font-weight:700; margin-bottom:0.4rem; }
+    .finding-stat { font-family:var(--heading-font); font-size:1.75rem; font-weight:800; color:var(--accent3); margin:0.5rem 0 0.3rem; }
+    .finding-card p { font-size:0.88rem; color:var(--muted); }
+
+    /* DAX CATEGORY TABS */
+    .dax-category { margin-bottom: 2.5rem; }
+    .dax-category-header { display:flex; align-items:center; gap:0.8rem; margin-bottom:1.2rem; padding:0.9rem 1.2rem; background:var(--surface2); border:1px solid var(--border); border-radius:10px; border-left:3px solid var(--accent); }
+    .dax-category-header.green { border-left-color:var(--accent2); }
+    .dax-category-header.amber { border-left-color:var(--accent3); }
+    .dax-category-header.red { border-left-color:var(--danger); }
+    .dax-cat-icon { font-size:1.2rem; }
+    .dax-cat-title { font-family:var(--heading-font); font-size:0.92rem; font-weight:700; }
+    .dax-cat-desc { font-size:0.76rem; color:var(--muted); margin-left:auto; }
+
+    /* PYRAMID */
+    .pyramid-container { display:flex; flex-direction:column; align-items:center; gap:0; margin:2rem 0; }
+    .pyramid-layer { display:flex; align-items:center; justify-content:center; border-radius:8px; padding:1rem 1.5rem; text-align:center; transition:transform 0.2s; cursor:default; }
+    .pyramid-layer:hover { transform:scale(1.02); }
+    .pyramid-layer-1 { width:40%; background:rgba(59,130,246,0.15); border:1.5px solid rgba(59,130,246,0.4); }
+    .pyramid-layer-2 { width:65%; background:rgba(16,185,129,0.12); border:1.5px solid rgba(16,185,129,0.35); margin-top:-1px; }
+    .pyramid-layer-3 { width:90%; background:rgba(245,158,11,0.1); border:1.5px solid rgba(245,158,11,0.3); margin-top:-1px; }
+    .pyramid-label { font-family:var(--heading-font); font-weight:800; font-size:1rem; }
+    .pyramid-sub { font-size:0.74rem; color:var(--muted); margin-top:0.2rem; }
+    .pyramid-layer-1 .pyramid-label { color:var(--accent); }
+    .pyramid-layer-2 .pyramid-label { color:var(--accent2); }
+    .pyramid-layer-3 .pyramid-label { color:var(--accent3); }
+
+    /* DASH FRAMEWORK */
+    .dash-framework-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:1rem; margin-bottom:2rem; }
+    .dash-fw-card { background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:1.3rem; border-top:3px solid var(--accent); transition:transform 0.2s; }
+    .dash-fw-card:hover { transform:translateY(-2px); }
+    .dash-fw-card:nth-child(2) { border-top-color:var(--accent2); }
+    .dash-fw-card:nth-child(3) { border-top-color:var(--accent3); }
+    .dash-fw-card:nth-child(4) { border-top-color:var(--danger); }
+    .dash-fw-letter { font-family:var(--heading-font); font-size:2rem; font-weight:800; color:var(--accent); line-height:1; }
+    .dash-fw-card:nth-child(2) .dash-fw-letter { color:var(--accent2); }
+    .dash-fw-card:nth-child(3) .dash-fw-letter { color:var(--accent3); }
+    .dash-fw-card:nth-child(4) .dash-fw-letter { color:var(--danger); }
+    .dash-fw-title { font-family:var(--heading-font); font-size:0.88rem; font-weight:700; margin:0.4rem 0 0.3rem; }
+    .dash-fw-desc { font-size:0.78rem; color:var(--muted); line-height:1.5; }
+
+    /* DASHBOARD GRID */
+    .dash-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:1.4rem; }
+    @media(min-width:768px){ .dash-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } }
+    .dash-card { background:var(--surface); border:1px solid var(--border); border-radius:12px; overflow:hidden; transition:border-color 0.25s,transform 0.25s; }
+    .dash-card:hover { border-color:var(--accent); transform:translateY(-3px); }
+    .dash-card-img { width:100%; aspect-ratio:16/9; background:var(--surface2); border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:center; color:var(--muted); font-size:0.74rem; flex-direction:column; gap:0.5rem; position:relative; overflow:hidden; }
+    .dash-card-img::before { content:''; position:absolute; inset:0; background:linear-gradient(135deg,rgba(59,130,246,0.05) 0%,transparent 60%); }
+    .dash-card-img img { width:100%; height:100%; object-fit:contain; display:block; background:var(--bg); position:relative; z-index:1; }
+    .dash-card-img:has(img)>div, .dash-card-img:has(img)>span { display:none; }
+    .dash-card-body { padding:1.2rem; }
+    .dash-card-num { font-size:0.68rem; font-weight:600; color:var(--accent); text-transform:uppercase; letter-spacing:0.04em; margin-bottom:0.4rem; }
+    .dash-card-body h3 { font-family:var(--heading-font); font-size:0.88rem; font-weight:700; margin-bottom:0.5rem; }
+    .dash-card-body p { font-size:0.76rem; color:var(--muted); line-height:1.5; }
+    .dash-tags { margin-top:0.8rem; display:flex; flex-wrap:wrap; gap:0.4rem; }
+    .dash-tag { font-size:0.66rem; background:rgba(59,130,246,0.1); color:#93c5fd; border:1px solid rgba(59,130,246,0.2); border-radius:4px; padding:0.15rem 0.5rem; }
+
+    /* RECOMMENDATION */
+    .rec-grid { display:grid; gap:1rem; }
+    .rec-card { background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:1.4rem 1.6rem; display:grid; grid-template-columns:auto 1fr; gap:1.2rem; align-items:start; transition:border-color 0.2s; }
+    .rec-card:hover { border-color:var(--accent2); }
+    .rec-icon { width:40px; height:40px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:1rem; flex-shrink:0; background:rgba(16,185,129,0.1); border:1px solid rgba(16,185,129,0.2); }
+    .rec-card h4 { font-family:var(--heading-font); font-size:0.88rem; font-weight:700; margin-bottom:0.3rem; }
+    .rec-card .rec-finding { font-size:0.78rem; color:var(--muted); margin-bottom:0.5rem; }
+    .rec-card .rec-action { font-size:0.78rem; color:var(--accent2); font-weight:500; }
+
+    /* KEY FINDINGS */
+    .kf-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:1rem; margin-bottom:2rem; }
+    .kf-card { background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:1.3rem; position:relative; overflow:hidden; }
+    .kf-card::before { content:''; position:absolute; top:0; left:0; right:0; height:3px; border-radius:12px 12px 0 0; background:var(--accent); }
+    .kf-card:nth-child(2)::before { background:var(--accent2); }
+    .kf-card:nth-child(3)::before { background:var(--accent3); }
+    .kf-card:nth-child(4)::before { background:var(--danger); }
+    .kf-card:nth-child(5)::before { background:#8b5cf6; }
+    .kf-number { font-family:var(--heading-font); font-size:2.2rem; font-weight:800; color:var(--accent); line-height:1; }
+    .kf-card:nth-child(2) .kf-number { color:var(--accent2); }
+    .kf-card:nth-child(3) .kf-number { color:var(--accent3); }
+    .kf-card:nth-child(4) .kf-number { color:var(--danger); }
+    .kf-card:nth-child(5) .kf-number { color:#8b5cf6; }
+    .kf-label { font-size:0.78rem; color:var(--text); font-weight:600; margin:0.4rem 0 0.2rem; }
+    .kf-desc { font-size:0.74rem; color:var(--muted); }
+
+    /* CONCLUSION */
+    .conclusion-card { background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:2rem 2.2rem; }
+    .conclusion-card p { color:var(--text); font-size:1rem; line-height:1.75; }
+    .conclusion-card p+p { color:var(--muted); margin-top:1rem; }
+
+    /* DOWNLOADS */
+    #downloads { background:var(--surface); border-top:1px solid var(--border); border-bottom:1px solid var(--border); padding:64px 2rem; }
+    #downloads>.inner { max-width:1100px; margin:0 auto; }
+    .download-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:1rem; margin-top:2rem; }
+    .download-card { background:var(--bg); border:1px solid var(--border); border-radius:12px; padding:1.4rem; display:flex; flex-direction:column; gap:0.8rem; text-decoration:none; color:inherit; transition:border-color 0.2s,transform 0.2s; }
+    .download-card:hover { border-color:var(--accent); transform:translateY(-2px); }
+    .download-icon { font-size:1.55rem; }
+    .download-card h4 { font-family:var(--heading-font); font-size:0.86rem; font-weight:700; line-height:1.3; }
+    .download-card p { font-size:0.76rem; color:var(--muted); flex:1; line-height:1.45; overflow-wrap:anywhere; word-break:break-word; }
+    .download-card .dl-btn { display:inline-flex; align-items:center; gap:0.4rem; font-size:0.72rem; font-weight:600; color:var(--accent); text-transform:uppercase; letter-spacing:0.02em; margin-top:0.4rem; }
+    .download-badge { font-size:0.66rem; background:rgba(16,185,129,0.1); color:#6ee7b7; border:1px solid rgba(16,185,129,0.25); border-radius:4px; padding:0.15rem 0.5rem; display:inline-block; margin-bottom:0.3rem; }
+
+    /* FOOTER */
+    footer { padding:2.5rem 2rem; text-align:center; font-size:0.76rem; color:var(--muted); border-top:1px solid var(--border); }
+    footer strong { color:var(--text); }
+
+    /* ANIMATIONS */
+    @keyframes fadeUp { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:translateY(0); } }
+    .reveal { opacity:0; transform:translateY(24px); transition:opacity 0.6s ease,transform 0.6s ease; }
+    .reveal.visible { opacity:1; transform:none; }
+
+    @media(max-width:768px) {
+      .nav-links { display:none; }
+      .schema-grid, .schema-dims { grid-template-columns:1fr; }
+      .pyramid-layer-1 { width:80%; }
+      .pyramid-layer-2 { width:90%; }
+      .pyramid-layer-3 { width:100%; }
+    }
+  </style>
+</head>
+
+<body>
+
+<!-- NAV -->
+<nav>
+  <a class="nav-brand" href="#">🩺 Student Health Analytics</a>
+  <ul class="nav-links">
+    <li><a href="#overview">Overview</a></li>
+    <li><a href="#collection">Data</a></li>
+    <li><a href="#preprocessing">Process</a></li>
+    <li><a href="#eda">EDA</a></li>
+    <li><a href="#modeling">Modeling</a></li>
+    <li><a href="#visualization">Dashboard</a></li>
+    <li><a href="#insights">Insights</a></li>
+    <li><a href="#keyfindings">Key Findings</a></li>
+    <li><a href="#downloads">Downloads</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-grid-bg"></div>
+  <div class="hero-inner">
+    <div class="hero-badge">📊 Final Project — Data Analytics</div>
+    <h1>Student Health<br /><span>Analytics Dashboard</span></h1>
+    <p class="hero-sub">A comprehensive Power BI dashboard analyzing behavioral, physical, mental, and academic health indicators from 50,000 student health records.</p>
+    <div class="hero-meta">
+      <span class="badge badge-blue">🔵 Power BI Desktop</span>
+      <span class="badge badge-amber">📁 50,000 Records</span>
+      <span class="badge badge-purple">🎓 BS Computer Science</span>
+      <span class="badge badge-green">✅ CLEAN Framework</span>
+    </div>
+    <div class="hero-cta">
+      <a href="#overview" class="btn btn-primary">↓ Explore the Project</a>
+      <a href="#downloads" class="btn btn-outline">📥 Download Files</a>
+    </div>
+  </div>
+</div>
+
+<!-- OVERVIEW -->
+<section id="overview">
+  <div class="section-tag">Project Overview</div>
+  <h2>About This Study</h2>
+  <p class="section-lead">This project analyzes student wellness data to identify major health risk factors and deliver data-driven recommendations for school administrators and health counselors. Built using Microsoft Power BI Desktop with a structured star schema and DAX-powered KPIs.</p>
+
+  <div class="stat-grid reveal">
+    <div class="stat-card green">
+      <div class="stat-label">Fit Students</div>
+      <div class="stat-value">50.96%</div>
+      <div class="stat-sub">25,481 out of 50,000</div>
+    </div>
+    <div class="stat-card amber">
+      <div class="stat-label">At-Risk Students</div>
+      <div class="stat-value">43.08%</div>
+      <div class="stat-sub">21,539 students flagged</div>
+    </div>
+    <div class="stat-card red">
+      <div class="stat-label">Unhealthy Students</div>
+      <div class="stat-value">5.96%</div>
+      <div class="stat-sub">2,980 requiring intervention</div>
+    </div>
+    <div class="stat-card blue">
+      <div class="stat-label">Total Records</div>
+      <div class="stat-value">50K</div>
+      <div class="stat-sub">22 columns · CSV format</div>
+    </div>
+  </div>
+
+  <div class="info-box reveal">
+    <span>⚠️</span>
+    <span><strong>Key Insight:</strong> Nearly half of students are classified as "at-risk," highlighting the urgent need for wellness monitoring and preventive health interventions across educational institutions.</span>
+  </div>
+
+  <div class="table-wrap reveal">
+    <table>
+      <thead><tr><th>Category</th><th>Metrics Tracked</th></tr></thead>
+      <tbody>
+        <tr><td>Physical</td><td>Sleep duration, BMI, heart rate, step count</td></tr>
+        <tr><td>Lifestyle</td><td>Exercise duration, water intake, screen time</td></tr>
+        <tr><td>Mental</td><td>Stress level, mental health status</td></tr>
+        <tr><td>Academic</td><td>Academic pressure level</td></tr>
+        <tr><td>Demographic</td><td>Gender, diet type, smoking status</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- DATA COLLECTION -->
+<section id="collection">
+  <div class="section-tag">Data Collection</div>
+  <h2>Dataset & Import</h2>
+  <p class="section-lead">The dataset was imported into Microsoft Power BI Desktop using the built-in Text/CSV connector. Although 100,000 records were suggested in the project brief, the 50,000-record dataset remains sufficiently large for statistical analysis and dashboard modeling due to its dense, multi-dimensional student health observations.</p>
+
+  <div class="step-grid reveal">
+    <div class="step-card">
+      <div class="step-num">01</div>
+      <div class="step-content"><h3>Open Power BI Desktop</h3><p>Launch the application and navigate to the Home ribbon to begin the data import process.</p></div>
+    </div>
+    <div class="step-card">
+      <div class="step-num">02</div>
+      <div class="step-content"><h3>Get Data → Text/CSV</h3><p>Select <em>Home → Get Data → Text/CSV</em> to load the dataset file.</p></div>
+    </div>
+    <div class="step-card">
+      <div class="step-num">03</div>
+      <div class="step-content"><h3>Import the Dataset</h3><p>Import <code>enhanced_student_health_dataset_50k.csv</code> and verify UTF-8 encoding with comma delimiter.</p></div>
+    </div>
+    <div class="step-card">
+      <div class="step-num">04</div>
+      <div class="step-content"><h3>Load to Power Query</h3><p>Send the dataset to Power Query Editor to begin preprocessing and transformations.</p></div>
+    </div>
+  </div>
+
+  <div style="margin-top:2.5rem;" class="reveal">
+    <div class="section-tag">Dataset Overview</div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Attribute</th><th>Details</th></tr></thead>
+        <tbody>
+          <tr><td>File Name</td><td><code>enhanced_student_health_dataset_50k.csv</code></td></tr>
+          <tr><td>Total Records</td><td>50,000</td></tr>
+          <tr><td>Total Columns</td><td>22</td></tr>
+          <tr><td>File Type</td><td>CSV (Comma-Separated Values)</td></tr>
+          <tr><td>Data Type</td><td>Structured Tabular Dataset</td></tr>
+          <tr><td>Target Variable</td><td><code>health_condition</code> — Fit / At-Risk / Unhealthy</td></tr>
+          <tr><td>Source</td><td>Kaggle — College Student Health Behavior Dataset</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div style="margin-top:2.5rem;" class="reveal">
+    <div class="section-tag">Key Variables</div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Column Name</th><th>Description</th><th>Type</th></tr></thead>
+        <tbody>
+          <tr><td><code>student_id</code></td><td>Unique student identifier</td><td>Text</td></tr>
+          <tr><td><code>sleep_duration</code></td><td>Hours of sleep per night</td><td>Decimal</td></tr>
+          <tr><td><code>heart_rate</code></td><td>Heart rate in BPM</td><td>Whole Number</td></tr>
+          <tr><td><code>bmi</code></td><td>Body Mass Index</td><td>Decimal</td></tr>
+          <tr><td><code>step_count</code></td><td>Daily steps taken</td><td>Whole Number</td></tr>
+          <tr><td><code>exercise_duration</code></td><td>Exercise duration in minutes</td><td>Whole Number</td></tr>
+          <tr><td><code>water_intake</code></td><td>Water intake in liters</td><td>Decimal</td></tr>
+          <tr><td><code>screen_time</code></td><td>Daily screen exposure in hours</td><td>Decimal</td></tr>
+          <tr><td><code>sitting_time</code></td><td>Daily sitting hours</td><td>Decimal</td></tr>
+          <tr><td><code>stress_level</code></td><td>Low / Medium / High</td><td>Text → Encoded 1/2/3</td></tr>
+          <tr><td><code>sleep_quality</code></td><td>Poor / Fair / Good</td><td>Text → Encoded</td></tr>
+          <tr><td><code>physical_activity_level</code></td><td>Sedentary / Moderate / Active</td><td>Text → Encoded</td></tr>
+          <tr><td><code>mental_health_status</code></td><td>Stable / Moderate / Poor</td><td>Text</td></tr>
+          <tr><td><code>academic_pressure</code></td><td>Low / Medium / High</td><td>Text → Encoded</td></tr>
+          <tr><td><code>smoking_status</code></td><td>Yes / No / Occasional</td><td>Text</td></tr>
+          <tr><td><code>diet_type</code></td><td>Balanced / Non-Veg / Veg</td><td>Text</td></tr>
+          <tr><td><code>gender</code></td><td>Male / Female / Other</td><td>Text</td></tr>
+          <tr><td><code>health_condition</code></td><td>Fit / At-Risk / Unhealthy (target)</td><td>Text → Encoded</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="reveal" style="margin-top:2rem;">
+    <div class="img-placeholder">
+      <img src="data-set-import.png" alt="Data Set Import Screenshot">
+      <div class="ph-icon">🖼️</div>
+      <span>[ Replace with: Data Set Import Screenshot ]</span>
+      <p style="font-size:0.7rem;color:var(--muted)">Recommended size: 1280×720px</p>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- DATA PREPROCESSING -->
+<section id="preprocessing">
+  <div class="section-tag">Data Preprocessing</div>
+  <h2>CLEAN Framework</h2>
+  <p class="section-lead">The CLEAN Framework is a data preprocessing and quality framework ensuring datasets are accurate, complete, consistent, and analytically reliable before visualization and modeling. Each component addresses a specific quality dimension critical to Power BI dashboard accuracy.</p>
+
+  <!-- CLEAN Framework Overview Table -->
+  <div class="table-wrap reveal" style="margin-bottom:2.5rem;">
+    <table>
+      <thead>
+        <tr>
+          <th>Component</th><th>Full Name</th><th>Purpose</th><th>Implementation in Project</th><th>Result</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong style="color:var(--accent2)">C</strong></td>
+          <td>Completeness</td>
+          <td>Ensure no missing values</td>
+          <td>Column Quality View in Power Query Editor</td>
+          <td style="color:var(--accent2)">100% valid — no nulls found</td>
+        </tr>
+        <tr>
+          <td><strong style="color:var(--accent2)">L</strong></td>
+          <td>Legitimacy</td>
+          <td>Validate records and numeric ranges</td>
+          <td>Remove Duplicates + range validation on BMI, sleep, heart rate</td>
+          <td style="color:var(--accent2)">No duplicates, all ranges valid</td>
+        </tr>
+        <tr>
+          <td><strong style="color:var(--accent2)">E</strong></td>
+          <td>Efficiency</td>
+          <td>Optimize structure and data types</td>
+          <td>Assigned Date/Time, Whole Number, Decimal, Text types; derived Hour, Month, DayOfWeek columns</td>
+          <td style="color:var(--accent2)">Optimized for filtering & performance</td>
+        </tr>
+        <tr>
+          <td><strong style="color:var(--accent2)">A</strong></td>
+          <td>Accuracy</td>
+          <td>Consistent encoding of categoricals</td>
+          <td>Ordinal encoding: Low=1, Medium=2, High=3 across stress, sleep quality, academic pressure, activity, health condition</td>
+          <td style="color:var(--accent2)">DAX-compatible encoded fields</td>
+        </tr>
+        <tr>
+          <td><strong style="color:var(--accent2)">N</strong></td>
+          <td>Normalization</td>
+          <td>Standardize values for modeling</td>
+          <td>Min-Max normalization applied to continuous variables for predictive modeling readiness</td>
+          <td style="color:var(--accent2)">Dataset ready for analytical modeling</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Detailed Preprocessing Work Table -->
+  <div class="section-tag reveal">Detailed Preprocessing Work</div>
+  <div class="table-wrap reveal" style="margin-bottom:2.5rem;">
+    <table>
+      <thead>
+        <tr>
+          <th>Preprocessing Task</th><th>Tool Used</th><th>Purpose</th><th>Steps Performed</th><th>Result</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Removed duplicate rows</td><td>Power Query Editor</td><td>Eliminate redundant records</td><td>Home → Remove Rows → Remove Duplicates</td><td style="color:var(--accent2)">No duplicates found</td>
+        </tr>
+        <tr>
+          <td>Checked null/empty values</td><td>Column Quality View</td><td>Ensure completeness</td><td>View → Column Quality → verified 100% valid across all 22 columns</td><td style="color:var(--accent2)">100% valid values</td>
+        </tr>
+        <tr>
+          <td>Validated numeric ranges</td><td>Power Query Editor</td><td>Detect out-of-range values</td><td>Sleep: 3–10 hrs ✓ · BMI: 16–35 ✓ · Heart Rate: 50–117 BPM ✓</td><td style="color:var(--accent2)">All values within expected ranges</td>
+        </tr>
+        <tr>
+          <td>Assigned data types</td><td>Power Query Editor</td><td>Improve analytical accuracy</td><td>Assigned: Date/Time, Whole Number, Decimal Number, Text per column</td><td style="color:var(--accent2)">Correct formatting applied</td>
+        </tr>
+        <tr>
+          <td>Encoded ordinal categories</td><td>Power BI (Add Column)</td><td>Support DAX numeric calculations</td><td>Low=1, Medium=2, High=3 applied to stress_level, sleep_quality, academic_pressure, physical_activity_level, health_condition</td><td style="color:var(--accent2)">Numerical categories created</td>
+        </tr>
+        <tr>
+          <td>Created derived columns</td><td>Power Query Editor</td><td>Support time-series filtering and trends</td><td>Added: Hour, Month, DayOfWeek from timestamp field</td><td style="color:var(--accent2)">Month/Day columns added</td>
+        </tr>
+        <tr>
+          <td>Normalized continuous variables</td><td>Power Query / DAX</td><td>Prepare for predictive modeling</td><td>Min-Max normalization applied to step_count, screen_time, sleep_duration, bmi</td><td style="color:var(--accent2)">Standardized values ready for modeling</td>
+        </tr>
+        <tr>
+          <td>Verified categorical values</td><td>Power Query Editor</td><td>Confirm expected category presence</td><td>Checked stress_level, physical_activity_level, mental_health_status, health_condition for valid category values only</td><td style="color:var(--accent2)">No unexpected values found</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- CLEAN Framework Step Cards -->
+  <div class="step-grid reveal">
+    <div class="step-card">
+      <div class="step-num" style="background:rgba(16,185,129,0.1);border-color:rgba(16,185,129,0.25);color:var(--accent2);">C</div>
+      <div class="step-content">
+        <h3>Completeness</h3>
+        <p>Used Column Quality View in Power Query Editor. Verified all 22 columns showed 100% valid values. <strong style="color:var(--accent2)">Result: No imputation required.</strong></p>
+        <ul class="bullet-list"><li>Column Quality View verified each column</li><li>No null or empty fields detected across 50,000 rows</li><li>Dataset immediately ready for analysis</li></ul>
+      </div>
+    </div>
+    <div class="step-card">
+      <div class="step-num" style="background:rgba(16,185,129,0.1);border-color:rgba(16,185,129,0.25);color:var(--accent2);">L</div>
+      <div class="step-content">
+        <h3>Legitimacy</h3>
+        <p>Removed duplicates and validated numeric ranges. <strong style="color:var(--accent2)">Result: No duplicate records found.</strong></p>
+        <ul class="bullet-list"><li>Sleep Duration: 3–10 hours ✓</li><li>BMI: 16–35 ✓</li><li>Heart Rate: 50–117 BPM ✓</li><li>All categorical fields validated for expected values</li></ul>
+      </div>
+    </div>
+    <div class="step-card">
+      <div class="step-num" style="background:rgba(16,185,129,0.1);border-color:rgba(16,185,129,0.25);color:var(--accent2);">E</div>
+      <div class="step-content">
+        <h3>Efficiency</h3>
+        <p>Assigned appropriate data types and created derived columns. <strong style="color:var(--accent2)">Result: Optimized for filtering and performance.</strong></p>
+        <ul class="bullet-list"><li>Assigned: Date/Time, Whole Number, Decimal, Text types</li><li>Created derived columns: Hour, Month, DayOfWeek</li></ul>
+      </div>
+    </div>
+    <div class="step-card">
+      <div class="step-num" style="background:rgba(16,185,129,0.1);border-color:rgba(16,185,129,0.25);color:var(--accent2);">A</div>
+      <div class="step-content">
+        <h3>Accuracy</h3>
+        <p>Ordinal categories encoded numerically for DAX compatibility.</p>
+        <ul class="bullet-list"><li>Low = 1 · Medium = 2 · High = 3</li><li>Applied to: stress_level, sleep_quality, academic_pressure, physical_activity_level, health_condition</li></ul>
+      </div>
+    </div>
+    <div class="step-card">
+      <div class="step-num" style="background:rgba(16,185,129,0.1);border-color:rgba(16,185,129,0.25);color:var(--accent2);">N</div>
+      <div class="step-content">
+        <h3>Normalization</h3>
+        <p>Min-Max normalization applied to continuous variables (step_count, screen_time, sleep_duration, bmi) to standardize values for future predictive modeling and comparison analysis.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="reveal" style="margin-top:2rem;">
+    <div class="img-placeholder">
+      <img src="clean-framework.png" alt="CLEAN Framework Screenshot">
+      <div class="ph-icon">🖼️</div>
+      <span>[ Replace with: CLEAN Framework / Power Query Screenshot ]</span>
+      <p style="font-size:0.7rem;color:var(--muted)">Recommended size: 1280×720px</p>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- EDA -->
+<section id="eda">
+  <div class="section-tag">Exploratory Data Analysis</div>
+  <h2>Descriptive Statistics & Patterns</h2>
+  <p class="section-lead">Statistical exploration to identify trends, correlations, and behavioral patterns across student health indicators. Gender distribution remained balanced across all health condition categories.</p>
+
+  <div class="metrics-grid reveal">
+    <div class="metric-card"><div class="metric-name">Sleep Duration</div><div class="metric-val">7.0 hrs</div><div class="metric-range">Range: 3–10 hrs</div></div>
+    <div class="metric-card"><div class="metric-name">Heart Rate</div><div class="metric-val">75 BPM</div><div class="metric-range">Range: 50–117 BPM</div></div>
+    <div class="metric-card"><div class="metric-name">BMI</div><div class="metric-val">23.0</div><div class="metric-range">Range: 16–35</div></div>
+    <div class="metric-card"><div class="metric-name">Step Count</div><div class="metric-val">7,985</div><div class="metric-range">Range: 1,000–14,999</div></div>
+    <div class="metric-card"><div class="metric-name">Exercise Duration</div><div class="metric-val">40 min</div><div class="metric-range">Range: 0–120 min</div></div>
+    <div class="metric-card"><div class="metric-name">Water Intake</div><div class="metric-val">2.2 L</div><div class="metric-range">Range: 0.5–5 L</div></div>
+    <div class="metric-card"><div class="metric-name">Screen Time</div><div class="metric-val">5.0 hrs</div><div class="metric-range">Range: 0–12 hrs</div></div>
+    <div class="metric-card"><div class="metric-name">Sitting Time</div><div class="metric-val">8.0 hrs</div><div class="metric-range">Range: 2–16 hrs</div></div>
+  </div>
+
+  <div style="margin-top:3rem;" class="reveal">
+    <div class="section-tag">Cross-Analysis Findings</div>
+    <div class="finding-grid">
+      <div class="finding-card">
+        <h4>Stress & Health Condition</h4>
+        <div class="finding-stat">83%</div>
+        <p>of unhealthy students exhibit high stress levels, compared to only 11% of fit students — a 72-point gap.</p>
+      </div>
+      <div class="finding-card">
+        <h4>Physical Activity</h4>
+        <div class="finding-stat">60%</div>
+        <p>of unhealthy students are sedentary, versus only 22% of fit students showing the same pattern.</p>
+      </div>
+      <div class="finding-card">
+        <h4>Sleep Patterns</h4>
+        <div class="finding-stat">−1.72 hrs</div>
+        <p>Fit students average 7.41 hrs of sleep. Unhealthy students average just 5.69 hrs — a significant deficit.</p>
+      </div>
+      <div class="finding-card">
+        <h4>Screen Time Impact</h4>
+        <div class="finding-stat">↑ Risk</div>
+        <p>Higher screen time correlates with reduced sleep duration and lower physical activity levels.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Stress vs Health Matrix from actual dashboard data -->
+  <div style="margin-top:2.5rem;" class="reveal">
+    <div class="section-tag">Stress vs Health Matrix</div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Stress Level</th><th>At-Risk Count</th><th>Fit Count</th><th>Unhealthy Count</th><th>Total</th></tr></thead>
+        <tbody>
+          <tr><td>High</td><td>9,711</td><td>2,745</td><td>2,461</td><td><strong>14,917</strong></td></tr>
+          <tr><td>Low</td><td>5,061</td><td>9,766</td><td>208</td><td><strong>15,035</strong></td></tr>
+          <tr><td>Medium</td><td>6,767</td><td>12,970</td><td>311</td><td><strong>20,048</strong></td></tr>
+          <tr style="background:var(--surface2);font-weight:700;"><td>Total</td><td>21,539</td><td>25,481</td><td>2,980</td><td><strong>50,000</strong></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- DATA MODELING -->
+<section id="modeling">
+  <div class="section-tag">Data Modeling</div>
+  <h2>Star Schema & DAX Measures</h2>
+  <p class="section-lead">A star schema was implemented to optimize analytical performance and dashboard responsiveness. DAX measures were organized using the Pyramid Framework — from high-level KPI monitoring down to detailed behavioral risk analysis.</p>
+
+  <!-- Star Schema -->
+  <div class="section-tag reveal" style="margin-bottom:1rem;">Star Schema Design</div>
+  <div class="schema-grid reveal">
+    <div class="schema-fact">
+      <h4>Fact Table</h4>
+      <ul class="bullet-list">
+        <li>FactStudentHealth — all transactional and health-related observations</li>
+        <li>Many-to-One relationships to all dimension tables</li>
+        <li>Contains all measurable health, lifestyle, and academic records</li>
+      </ul>
+    </div>
+    <div class="schema-dims">
+      <div class="schema-dim"><h4>DimStudent</h4><p>Student demographics: gender, student_id</p></div>
+      <div class="schema-dim"><h4>DimHealth</h4><p>Physical indicators: BMI, heart rate, health condition, mental health, sleep quality</p></div>
+      <div class="schema-dim"><h4>DimLifestyle</h4><p>Daily behaviors: water intake, diet type, physical activity level, smoking status</p></div>
+      <div class="schema-dim"><h4>DimAcademic</h4><p>Academic factors: academic pressure, social relationships</p></div>
+      <div class="schema-dim"><h4>DimDate</h4><p>Time-based analysis: DayOfWeek, Hour, Month, Timestamp</p></div>
+    </div>
+  </div>
+
+  <!-- Benefits -->
+  <div class="table-wrap reveal" style="margin-top:1.5rem;margin-bottom:2rem;">
+    <table>
+      <thead><tr><th>Star Schema Benefit</th><th>Impact on Dashboard</th></tr></thead>
+      <tbody>
+        <tr><td>Faster query performance</td><td>Reduced DAX calculation time for large 50K dataset</td></tr>
+        <tr><td>Simplified filtering</td><td>Slicers work cleanly across dimension tables</td></tr>
+        <tr><td>Improved DAX calculations</td><td>Cleaner measure references across related tables</td></tr>
+        <tr><td>Better scalability</td><td>Schema can expand with additional dimension tables</td></tr>
+        <tr><td>Enhanced dashboard responsiveness</td><td>Faster visual refresh on filter interaction</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Actual Data Model Image -->
+  <div class="reveal" style="margin-top:2rem;">
+    <div class="section-tag">Actual Power BI Data Model</div>
+    <div class="img-placeholder" style="aspect-ratio:4/3;">
+      <img src="star-schema-model.png" alt="Power BI Star Schema Data Model">
+      <div class="ph-icon">🖼️</div>
+      <span>[ Replace with: Power BI Data Model Screenshot ]</span>
+      <p style="font-size:0.7rem;color:var(--muted)">From Power BI Desktop → Model View</p>
+    </div>
+  </div>
+
+  <!-- DAX MEASURES -->
+  <div style="margin-top:3rem;" class="reveal">
+    <div class="section-tag">DAX Measures — Complete Reference</div>
+    <p class="section-lead" style="margin-bottom:2rem;">All DAX measures organized by the Pyramid Framework layer. Each measure appears exactly once; there are no duplicates across measure groups.</p>
+
+    <!-- Layer 1: Core KPI Measures -->
+    <div class="dax-category reveal">
+      <div class="dax-category-header">
+        <span class="dax-cat-icon">📊</span>
+        <div>
+          <div class="dax-cat-title">Layer 1 — Core KPI Measures</div>
+          <div style="font-size:0.76rem;color:var(--muted);margin-top:0.2rem;">Top of Pyramid · Executive-level monitoring and rapid decision-making indicators</div>
+        </div>
+        <span class="dax-cat-desc">5 measures</span>
+      </div>
+      <div class="table-wrap" style="margin-bottom:1.2rem;">
+        <table>
+          <thead><tr><th>Measure Name</th><th>DAX Formula</th><th>Purpose</th></tr></thead>
+          <tbody>
+            <tr><td><code>Total Students</code></td><td><code>COUNT(FactStudentHealth[student_id])</code></td><td>Total population count</td></tr>
+            <tr><td><code>% Fit Students</code></td><td><code>DIVIDE(CALCULATE(COUNTROWS(FactStudentHealth), FactStudentHealth[health_condition]="fit"), COUNTROWS(FactStudentHealth),0)*100</code></td><td>Percentage of fit students</td></tr>
+            <tr><td><code>% At-Risk Students</code></td><td><code>DIVIDE(CALCULATE(COUNTROWS(FactStudentHealth), FactStudentHealth[health_condition]="at-risk"), COUNTROWS(FactStudentHealth),0)*100</code></td><td>Percentage at-risk</td></tr>
+            <tr><td><code>% Unhealthy Students</code></td><td><code>DIVIDE(CALCULATE(COUNTROWS(FactStudentHealth), FactStudentHealth[health_condition]="unhealthy"), COUNTROWS(FactStudentHealth),0)*100</code></td><td>Percentage unhealthy</td></tr>
+            <tr><td><code>High Stress Count</code></td><td><code>CALCULATE(COUNTROWS(FactStudentHealth), FactStudentHealth[stress_level]="high")</code></td><td>Count of high-stress students</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <pre class="code-block"><code><span class="cm">// ── LAYER 1: CORE KPI MEASURES ──────────────────────────────────────</span>
+
+Total Students =
+COUNT(FactStudentHealth[student_id])
+
+% Fit Students =
+DIVIDE(
+    CALCULATE(
+        COUNTROWS(FactStudentHealth),
+        FactStudentHealth[health_condition] = "fit"
+    ),
+    COUNTROWS(FactStudentHealth),
+    0
+) * 100
+
+% At-Risk Students =
+DIVIDE(
+    CALCULATE(
+        COUNTROWS(FactStudentHealth),
+        FactStudentHealth[health_condition] = "at-risk"
+    ),
+    COUNTROWS(FactStudentHealth),
+    0
+) * 100
+
+% Unhealthy Students =
+DIVIDE(
+    CALCULATE(
+        COUNTROWS(FactStudentHealth),
+        FactStudentHealth[health_condition] = "unhealthy"
+    ),
+    COUNTROWS(FactStudentHealth),
+    0
+) * 100
+
+High Stress Count =
+CALCULATE(
+    COUNTROWS(FactStudentHealth),
+    FactStudentHealth[stress_level] = "high"
+)</code></pre>
+    </div>
+
+    <!-- Layer 2: Behavioral Measures -->
+    <div class="dax-category reveal">
+      <div class="dax-category-header green">
+        <span class="dax-cat-icon">🏃</span>
+        <div>
+          <div class="dax-cat-title">Layer 2 — Behavioral Average Measures</div>
+          <div style="font-size:0.76rem;color:var(--muted);margin-top:0.2rem;">Middle of Pyramid · Lifestyle and physical behavior trend analysis</div>
+        </div>
+        <span class="dax-cat-desc">8 measures</span>
+      </div>
+      <div class="table-wrap" style="margin-bottom:1.2rem;">
+        <table>
+          <thead><tr><th>Measure Name</th><th>DAX Formula</th><th>Purpose</th></tr></thead>
+          <tbody>
+            <tr><td><code>Avg Sleep Duration</code></td><td><code>AVERAGE(FactStudentHealth[sleep_duration])</code></td><td>Average nightly sleep hours</td></tr>
+            <tr><td><code>Avg BMI</code></td><td><code>AVERAGE(FactStudentHealth[bmi])</code></td><td>Average body mass index</td></tr>
+            <tr><td><code>Avg Step Count</code></td><td><code>AVERAGE(FactStudentHealth[step_count])</code></td><td>Average daily steps</td></tr>
+            <tr><td><code>Avg Screen Time</code></td><td><code>AVERAGE(FactStudentHealth[screen_time])</code></td><td>Average daily screen exposure</td></tr>
+            <tr><td><code>Avg Exercise Duration</code></td><td><code>AVERAGE(FactStudentHealth[exercise_duration])</code></td><td>Average exercise minutes per day</td></tr>
+            <tr><td><code>Avg Water Intake</code></td><td><code>AVERAGE(FactStudentHealth[water_intake])</code></td><td>Average liters of water consumed</td></tr>
+            <tr><td><code>Avg Heart Rate</code></td><td><code>AVERAGE(FactStudentHealth[heart_rate])</code></td><td>Average heart rate in BPM</td></tr>
+            <tr><td><code>Avg Sitting Time</code></td><td><code>AVERAGE(FactStudentHealth[sitting_time])</code></td><td>Average daily sedentary hours</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <pre class="code-block"><code><span class="cm">// ── LAYER 2: BEHAVIORAL AVERAGE MEASURES ────────────────────────────</span>
+
+Avg Sleep Duration   = AVERAGE(FactStudentHealth[sleep_duration])
+Avg BMI              = AVERAGE(FactStudentHealth[bmi])
+Avg Step Count       = AVERAGE(FactStudentHealth[step_count])
+Avg Screen Time      = AVERAGE(FactStudentHealth[screen_time])
+Avg Exercise Duration = AVERAGE(FactStudentHealth[exercise_duration])
+Avg Water Intake     = AVERAGE(FactStudentHealth[water_intake])
+Avg Heart Rate       = AVERAGE(FactStudentHealth[heart_rate])
+Avg Sitting Time     = AVERAGE(FactStudentHealth[sitting_time])</code></pre>
+    </div>
+
+    <!-- Layer 3: Distribution & Risk Measures -->
+    <div class="dax-category reveal">
+      <div class="dax-category-header amber">
+        <span class="dax-cat-icon">📈</span>
+        <div>
+          <div class="dax-cat-title">Layer 3 — Distribution & Risk Analysis Measures</div>
+          <div style="font-size:0.76rem;color:var(--muted);margin-top:0.2rem;">Base of Pyramid · Population breakdown and risk scoring</div>
+        </div>
+        <span class="dax-cat-desc">8 measures</span>
+      </div>
+      <div class="table-wrap" style="margin-bottom:1.2rem;">
+        <table>
+          <thead><tr><th>Measure Name</th><th>DAX Formula</th><th>Purpose</th></tr></thead>
+          <tbody>
+            <tr><td><code>Fit Students</code></td><td><code>CALCULATE(COUNTROWS(FactStudentHealth), FactStudentHealth[health_condition]="fit")</code></td><td>Count of fit students</td></tr>
+            <tr><td><code>At-Risk Students</code></td><td><code>CALCULATE(COUNTROWS(FactStudentHealth), FactStudentHealth[health_condition]="at-risk")</code></td><td>Count of at-risk students</td></tr>
+            <tr><td><code>Unhealthy Students</code></td><td><code>CALCULATE(COUNTROWS(FactStudentHealth), FactStudentHealth[health_condition]="unhealthy")</code></td><td>Count of unhealthy students</td></tr>
+            <tr><td><code>High Risk Students</code></td><td><code>CALCULATE(COUNTROWS(FactStudentHealth), FactStudentHealth[stress_level]="high", FactStudentHealth[physical_activity_level]="sedentary")</code></td><td>Combined high-stress & sedentary count</td></tr>
+            <tr><td><code>% High Risk Students</code></td><td><code>DIVIDE([High Risk Students], [Total Students], 0) * 100</code></td><td>Proportion of highest-risk group</td></tr>
+            <tr><td><code>Sedentary Rate</code></td><td><code>DIVIDE(CALCULATE(COUNTROWS(FactStudentHealth), FactStudentHealth[physical_activity_level]="sedentary"), COUNTROWS(FactStudentHealth)) * 100</code></td><td>% of students who are sedentary</td></tr>
+            <tr><td><code>Avg Stress Level</code></td><td><code>AVERAGE(FactStudentHealth[stress_level])</code></td><td>Average encoded stress level (1–3)</td></tr>
+            <tr><td><code>Health Risk Score</code></td><td><code>AVERAGE(FactStudentHealth[stress_level]) + AVERAGE(FactStudentHealth[sleep_quality]) + AVERAGE(FactStudentHealth[physical_activity_level])</code></td><td>Composite behavioral risk score</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <pre class="code-block"><code><span class="cm">// ── LAYER 3: DISTRIBUTION & RISK ANALYSIS ───────────────────────────</span>
+
+Fit Students =
+CALCULATE(COUNTROWS(FactStudentHealth),
+    FactStudentHealth[health_condition] = "fit")
+
+At-Risk Students =
+CALCULATE(COUNTROWS(FactStudentHealth),
+    FactStudentHealth[health_condition] = "at-risk")
+
+Unhealthy Students =
+CALCULATE(COUNTROWS(FactStudentHealth),
+    FactStudentHealth[health_condition] = "unhealthy")
+
+High Risk Students =
+CALCULATE(
+    COUNTROWS(FactStudentHealth),
+    FactStudentHealth[stress_level] = "high",
+    FactStudentHealth[physical_activity_level] = "sedentary"
+)
+
+% High Risk Students =
+DIVIDE([High Risk Students], [Total Students], 0) * 100
+
+Sedentary Rate =
+DIVIDE(
+    CALCULATE(COUNTROWS(FactStudentHealth),
+        FactStudentHealth[physical_activity_level] = "sedentary"),
+    COUNTROWS(FactStudentHealth)
+) * 100
+
+Avg Stress Level =
+AVERAGE(FactStudentHealth[stress_level])
+
+Health Risk Score =
+    AVERAGE(FactStudentHealth[stress_level])
+  + AVERAGE(FactStudentHealth[sleep_quality])
+  + AVERAGE(FactStudentHealth[physical_activity_level])</code></pre>
+    </div>
+
+    <!-- Layer 3b: Deep Analysis Measures -->
+    <div class="dax-category reveal">
+      <div class="dax-category-header red">
+        <span class="dax-cat-icon">🔬</span>
+        <div>
+          <div class="dax-cat-title">Layer 3 — Deep Analysis Measures</div>
+          <div style="font-size:0.76rem;color:var(--muted);margin-top:0.2rem;">Base of Pyramid · Combined risk factors, mental health, and intervention targeting</div>
+        </div>
+        <span class="dax-cat-desc">5 measures</span>
+      </div>
+      <div class="table-wrap" style="margin-bottom:1.2rem;">
+        <table>
+          <thead><tr><th>Measure Name</th><th>DAX Formula</th><th>Purpose</th></tr></thead>
+          <tbody>
+            <tr><td><code>Sedentary &amp; High Stress</code></td><td><code>CALCULATE(COUNTROWS(FactStudentHealth), FactStudentHealth[physical_activity_level]="sedentary", FactStudentHealth[stress_level]="high")</code></td><td>Combined worst-case behavioral group</td></tr>
+            <tr><td><code>Poor Sleep Count</code></td><td><code>CALCULATE(COUNTROWS(FactStudentHealth), FactStudentHealth[sleep_quality]="poor")</code></td><td>Students with poor sleep quality</td></tr>
+            <tr><td><code>Smoker &amp; Unhealthy</code></td><td><code>CALCULATE(COUNTROWS(FactStudentHealth), FactStudentHealth[smoking_status]="yes", FactStudentHealth[health_condition]="unhealthy")</code></td><td>Intersection of smoking and poor health</td></tr>
+            <tr><td><code>Mental Health Poor %</code></td><td><code>DIVIDE(CALCULATE(COUNTROWS(FactStudentHealth), FactStudentHealth[mental_health_status]="poor"), COUNTROWS(FactStudentHealth),0)*100</code></td><td>% with poor mental health</td></tr>
+            <tr><td><code>High Pressure &amp; Poor Mental</code></td><td><code>CALCULATE(COUNTROWS(FactStudentHealth), FactStudentHealth[academic_pressure]="high", FactStudentHealth[mental_health_status]="poor")</code></td><td>Academic pressure + mental health risk</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <pre class="code-block"><code><span class="cm">// ── LAYER 3: DEEP ANALYSIS MEASURES ─────────────────────────────────</span>
+
+Sedentary &amp; High Stress =
+CALCULATE(
+    COUNTROWS(FactStudentHealth),
+    FactStudentHealth[physical_activity_level] = "sedentary",
+    FactStudentHealth[stress_level] = "high"
+)
+
+Poor Sleep Count =
+CALCULATE(
+    COUNTROWS(FactStudentHealth),
+    FactStudentHealth[sleep_quality] = "poor"
+)
+
+Smoker &amp; Unhealthy =
+CALCULATE(
+    COUNTROWS(FactStudentHealth),
+    FactStudentHealth[smoking_status] = "yes",
+    FactStudentHealth[health_condition] = "unhealthy"
+)
+
+Mental Health Poor % =
+DIVIDE(
+    CALCULATE(
+        COUNTROWS(FactStudentHealth),
+        FactStudentHealth[mental_health_status] = "poor"
+    ),
+    COUNTROWS(FactStudentHealth),
+    0
+) * 100
+
+High Pressure &amp; Poor Mental =
+CALCULATE(
+    COUNTROWS(FactStudentHealth),
+    FactStudentHealth[academic_pressure] = "high",
+    FactStudentHealth[mental_health_status] = "poor"
+)</code></pre>
+    </div>
+  </div>
+
+  <!-- PYRAMID FRAMEWORK -->
+  <div style="margin-top:3rem;" class="reveal" id="pyramid">
+    <div class="section-tag">Pyramid Framework</div>
+    <h2 style="margin-bottom:0.5rem;">Analytical Hierarchy</h2>
+    <p class="section-lead">The Pyramid Framework organizes all 26 DAX measures into three hierarchical layers based on complexity and decision-making importance — from executive KPI monitoring down to targeted intervention analysis.</p>
+
+    <div class="pyramid-container reveal">
+      <div class="pyramid-layer pyramid-layer-1">
+        <div>
+          <div class="pyramid-label">KPI Layer</div>
+          <div class="pyramid-sub">5 measures · Executive Overview · Rapid Monitoring</div>
+        </div>
+      </div>
+      <div class="pyramid-layer pyramid-layer-2">
+        <div>
+          <div class="pyramid-label">Behavioral Layer</div>
+          <div class="pyramid-sub">8 measures · Lifestyle & Physical Trends · Pattern Analysis</div>
+        </div>
+      </div>
+      <div class="pyramid-layer pyramid-layer-3">
+        <div>
+          <div class="pyramid-label">Deep Analysis Layer</div>
+          <div class="pyramid-sub">13 measures · Risk Correlation · Targeted Intervention · Combined Risk Factors</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="table-wrap reveal" style="margin-top:1.5rem;">
+      <table>
+        <thead><tr><th>Layer</th><th>Name</th><th>Measure Count</th><th>Decision Level</th><th>Key Use Case</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><strong style="color:var(--accent)">▲ Top</strong></td>
+            <td>KPI Measures</td><td>5</td><td>Executive / Administrator</td>
+            <td>Monitor overall wellness distribution, at-risk percentages, and high-stress counts</td>
+          </tr>
+          <tr>
+            <td><strong style="color:var(--accent2)">▲ Middle</strong></td>
+            <td>Behavioral Averages</td><td>8</td><td>Health Counselor / Analyst</td>
+            <td>Analyze lifestyle trends: sleep, activity, screen time, hydration, exercise habits</td>
+          </tr>
+          <tr>
+            <td><strong style="color:var(--accent3)">▲ Base</strong></td>
+            <td>Deep Analysis &amp; Risk</td><td>13</td><td>Intervention Specialist</td>
+            <td>Identify combined behavioral risk factors, mental health concerns, and high-risk student groups for targeted programs</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Pyramid Framework Image -->
+    <div class="reveal" style="margin-top:2rem;">
+      <div class="img-placeholder" style="aspect-ratio:16/9;">
+        <img src="pyramid-framework.png" alt="Pyramid Framework">
+        <div class="ph-icon">🖼️</div>
+        <span>[ Replace with: Pyramid Framework Image from Documentation ]</span>
+        <p style="font-size:0.7rem;color:var(--muted)">Recommended size: 1280×720px</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- VISUALIZATION & DASHBOARD -->
+<section id="visualization">
+  <div class="section-tag">Visualization & Dashboard</div>
+  <h2>DASH Framework & Dashboard Pages</h2>
+  <p class="section-lead">The DASH Framework guided dashboard design to ensure visuals are not only appealing but meaningful and actionable. Four interactive dashboard pages were designed following this framework principle.</p>
+
+  <!-- DASH Framework -->
+  <div class="section-tag reveal" style="margin-bottom:1rem;">DASH Framework</div>
+  <div class="dash-framework-grid reveal">
+    <div class="dash-fw-card">
+      <div class="dash-fw-letter">D</div>
+      <div class="dash-fw-title">Data-Driven</div>
+      <div class="dash-fw-desc">All visuals are connected to DAX measures. Every chart, KPI card, and trend visual directly reflects calculated data from the star schema model — no static values.</div>
+    </div>
+    <div class="dash-fw-card">
+      <div class="dash-fw-letter">A</div>
+      <div class="dash-fw-title">Audience-Focused</div>
+      <div class="dash-fw-desc">Designed for school administrators and health counselors. Page 1 serves executives with KPIs; Pages 2–4 serve analysts and counselors with deeper behavioral breakdowns.</div>
+    </div>
+    <div class="dash-fw-card">
+      <div class="dash-fw-letter">S</div>
+      <div class="dash-fw-title">Story-Driven</div>
+      <div class="dash-fw-desc">Dashboard flows from high-level overview (Page 1) to risk factor analysis (Page 2) to behavioral patterns (Page 3) to demographic profiling (Page 4) — a narrative arc.</div>
+    </div>
+    <div class="dash-fw-card">
+      <div class="dash-fw-letter">H</div>
+      <div class="dash-fw-title">Hierarchical</div>
+      <div class="dash-fw-desc">Critical KPIs (Total Students, % Fit, % At-Risk, High Stress Count) are placed at the top of each page. Supporting charts and tables follow below in descending importance.</div>
+    </div>
+  </div>
+
+  <!-- Dashboard Framework / Wireframe Image -->
+  <div class="section-tag reveal" style="margin-bottom:1rem;margin-top:2rem;">Dashboard Wireframe</div>
+  <div class="reveal">
+    <div class="img-placeholder" style="aspect-ratio:4/3;">
+      <img src="dashboard-framework.png" alt="Dashboard Wireframe Design">
+      <div class="ph-icon">🖼️</div>
+      <span>[ Replace with: Dashboard Wireframe from Documentation ]</span>
+      <p style="font-size:0.7rem;color:var(--muted)">The wireframe shows KPI cards → Health Condition Donut → Stress vs Health Bar Chart → Gender/Diet/Activity Slicers</p>
+    </div>
+  </div>
+
+  <!-- Dashboard Pages -->
+  <div class="section-tag reveal" style="margin-top:3rem;margin-bottom:1rem;">Actual Dashboard Pages</div>
+  <div class="dash-grid reveal">
+    <div class="dash-card">
+      <div class="dash-card-img">
+        <img src="dashboard1.png" alt="Summary Dashboard Page 1">
+        <div>🖼️</div><span style="font-size:0.72rem;">Page 01 Screenshot</span>
+      </div>
+      <div class="dash-card-body">
+        <div class="dash-card-num">Page 01</div>
+        <h3>Summary Dashboard</h3>
+        <p>High-level overview of student wellness with KPI cards (Total Students, % Fit, % At-Risk, High Stress Count), health condition donut chart, stress vs health stacked bar, and interactive slicers for Gender, Diet Type, Physical Activity Level, and Academic Pressure.</p>
+        <div class="dash-tags">
+          <span class="dash-tag">KPI Cards</span><span class="dash-tag">Donut Chart</span><span class="dash-tag">Stacked Bar</span><span class="dash-tag">Slicers</span>
+        </div>
+      </div>
+    </div>
+    <div class="dash-card">
+      <div class="dash-card-img">
+        <img src="dashboard2.png" alt="Health Risk Factor Analysis Page 2">
+        <div>🖼️</div><span style="font-size:0.72rem;">Page 02 Screenshot</span>
+      </div>
+      <div class="dash-card-body">
+        <div class="dash-card-num">Page 02</div>
+        <h3>Health Risk Factor Analysis</h3>
+        <p>Examines behavioral contributors to health outcomes. Includes Sleep vs Health Condition bar chart, Exercise vs Health Condition, Activity Level Distribution (100% stacked bar), Stress vs Health Matrix table, and At-Risk Trend scatter plot.</p>
+        <div class="dash-tags">
+          <span class="dash-tag">Sleep vs Health</span><span class="dash-tag">Stress Matrix</span><span class="dash-tag">Activity Distribution</span><span class="dash-tag">Trend Scatter</span>
+        </div>
+      </div>
+    </div>
+    <div class="dash-card">
+      <div class="dash-card-img">
+        <img src="dashboard3.png" alt="Behavioral & Stress Analysis Page 3">
+        <div>🖼️</div><span style="font-size:0.72rem;">Page 03 Screenshot</span>
+      </div>
+      <div class="dash-card-body">
+        <div class="dash-card-num">Page 03</div>
+        <h3>Behavioral & Stress Analysis</h3>
+        <p>Evaluates how daily habits influence stress. KPI cards show Avg Sleep Duration (6.99 hrs), Avg Exercise Duration (40.12 min), High Stress Count (15K). Charts: Activity Level vs Stress, Stress Distribution donut (High: 40.1%, Medium: 29.63%, Low: 30.07%), Smoking vs Stress, Sleep Duration vs Stress.</p>
+        <div class="dash-tags">
+          <span class="dash-tag">Stress Distribution</span><span class="dash-tag">Activity vs Stress</span><span class="dash-tag">Smoking vs Stress</span><span class="dash-tag">Sleep vs Stress</span>
+        </div>
+      </div>
+    </div>
+    <div class="dash-card">
+      <div class="dash-card-img">
+        <img src="dashboard4.png" alt="Demographic Risk Profile Page 4">
+        <div>🖼️</div><span style="font-size:0.72rem;">Page 04 Screenshot</span>
+      </div>
+      <div class="dash-card-body">
+        <div class="dash-card-num">Page 04</div>
+        <h3>Demographic Risk Profile</h3>
+        <p>Identifies vulnerable demographic groups. Charts: Gender vs Health Condition, Diet Type vs Health Condition, Smoking Behavior donut (No: 33.07%, Yes: 33.71%, Occasional: 33.22%). Highest Risk Students table with student_id, gender, stress_level, sum of sleep duration, step count, and Risk Score.</p>
+        <div class="dash-tags">
+          <span class="dash-tag">Gender Analysis</span><span class="dash-tag">Diet Type</span><span class="dash-tag">Smoking Behavior</span><span class="dash-tag">High-Risk Table</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- INSIGHTS & RECOMMENDATIONS -->
+<section id="insights">
+  <div class="section-tag">Insights & Recommendations</div>
+  <h2>Data-Driven Recommendations</h2>
+  <p class="section-lead">Five actionable recommendations derived from dashboard analysis, designed for school administrators and health counselors to implement targeted wellness interventions.</p>
+
+  <div class="rec-grid reveal">
+    <div class="rec-card">
+      <div class="rec-icon">😰</div>
+      <div>
+        <h4>Stress is the Primary Health Risk Driver</h4>
+        <p class="rec-finding">83% of unhealthy students experience high stress levels vs. only 11% of fit students — a 72-point gap. High-stress students account for 14,917 out of 50,000 records.</p>
+        <p class="rec-action">→ Implement school-wide stress management programs, counseling access, and mindfulness activities.</p>
+      </div>
+    </div>
+    <div class="rec-card">
+      <div class="rec-icon">😴</div>
+      <div>
+        <h4>Sleep Deprivation Correlates with Poor Health</h4>
+        <p class="rec-finding">Unhealthy students average only 5.69 hrs of sleep vs. 7.41 hrs for fit students — a 1.72-hour nightly deficit that compounds over time.</p>
+        <p class="rec-action">→ Promote sleep hygiene awareness and reduce early academic scheduling pressure on students.</p>
+      </div>
+    </div>
+    <div class="rec-card">
+      <div class="rec-icon">🏃</div>
+      <div>
+        <h4>Sedentary Lifestyle Increases Health Risk</h4>
+        <p class="rec-finding">60% of unhealthy students are sedentary vs. only 22% of fit students. The Sedentary & High Stress combined group represents an extreme intervention priority.</p>
+        <p class="rec-action">→ Introduce campus fitness programs and mandatory daily physical activity initiatives for all students.</p>
+      </div>
+    </div>
+    <div class="rec-card">
+      <div class="rec-icon">📱</div>
+      <div>
+        <h4>Excessive Screen Time Contributes to Health Risks</h4>
+        <p class="rec-finding">Students averaging higher screen time (>5 hrs/day) show reduced sleep duration, lower physical activity, and poorer mental health outcomes across all indicators.</p>
+        <p class="rec-action">→ Promote healthy digital habits and launch screen-time awareness campaigns on campus.</p>
+      </div>
+    </div>
+    <div class="rec-card">
+      <div class="rec-icon">⚕️</div>
+      <div>
+        <h4>Nearly Half of Students are At-Risk</h4>
+        <p class="rec-finding">43.08% of the student population (21,539 students) are classified at-risk — requiring proactive monitoring before transitioning to the unhealthy category.</p>
+        <p class="rec-action">→ Develop a long-term student wellness initiative focused on behavioral prevention and early intervention.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Conclusion -->
+  <div style="margin-top:3.5rem;" class="reveal">
+    <h2 style="margin-bottom:1rem;">Conclusion</h2>
+    <div class="conclusion-card">
+      <p>This project successfully demonstrated the use of Microsoft Power BI Desktop for large-scale student health analytics. Through data preprocessing using the CLEAN framework, star schema modeling, the Pyramid Framework for DAX measure hierarchy, DASH Framework for dashboard design, and 4 interactive dashboard pages, meaningful insights were generated regarding student wellness trends and behavioral health risks.</p>
+      <p>The findings confirm that stress, insufficient sleep, sedentary lifestyles, and excessive screen time are strongly associated with unhealthy student conditions. The developed dashboard provides administrators and counselors with a powerful decision-support tool capable of monitoring student wellness and identifying vulnerable populations for targeted interventions. Future enhancements may include predictive analytics, machine learning integration, real-time health monitoring, and automated early-warning systems for at-risk students.</p>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- KEY FINDINGS -->
+<section id="keyfindings">
+  <div class="section-tag">Key Findings</div>
+  <h2>Summary of Critical Findings</h2>
+  <p class="section-lead">The most significant data-driven findings from the Student Health Analytics Dashboard — at a glance.</p>
+
+  <div class="kf-grid reveal">
+    <div class="kf-card">
+      <div class="kf-number">83%</div>
+      <div class="kf-label">Unhealthy = High Stress</div>
+      <div class="kf-desc">83% of unhealthy students show high stress vs. only 11% of fit students</div>
+    </div>
+    <div class="kf-card">
+      <div class="kf-number">43%</div>
+      <div class="kf-label">At-Risk Population</div>
+      <div class="kf-desc">21,539 of 50,000 students are flagged at-risk — nearly half the population</div>
+    </div>
+    <div class="kf-card">
+      <div class="kf-number">−1.72h</div>
+      <div class="kf-label">Sleep Deficit</div>
+      <div class="kf-desc">Unhealthy students sleep 5.69 hrs vs. 7.41 hrs for fit students per night</div>
+    </div>
+    <div class="kf-card">
+      <div class="kf-number">60%</div>
+      <div class="kf-label">Sedentary Unhealthy</div>
+      <div class="kf-desc">60% of unhealthy students are physically sedentary vs. only 22% of fit students</div>
+    </div>
+    <div class="kf-card">
+      <div class="kf-number">14.9K</div>
+      <div class="kf-label">High Stress Count</div>
+      <div class="kf-desc">14,917 students classified as high-stress — the largest single risk group</div>
+    </div>
+  </div>
+
+  <div class="table-wrap reveal" style="margin-top:2rem;">
+    <table>
+      <thead><tr><th>Finding</th><th>Metric</th><th>Fit Students</th><th>Unhealthy Students</th><th>Difference</th></tr></thead>
+      <tbody>
+        <tr><td>High Stress Rate</td><td>% with high stress</td><td style="color:var(--accent2)">11%</td><td style="color:var(--danger)">83%</td><td>+72 percentage points</td></tr>
+        <tr><td>Average Sleep</td><td>Hours per night</td><td style="color:var(--accent2)">7.41 hrs</td><td style="color:var(--danger)">5.69 hrs</td><td>−1.72 hrs nightly</td></tr>
+        <tr><td>Sedentary Rate</td><td>% physically inactive</td><td style="color:var(--accent2)">22%</td><td style="color:var(--danger)">60%</td><td>+38 percentage points</td></tr>
+        <tr><td>High Academic Pressure + Poor Mental Health</td><td>Combined risk count</td><td style="color:var(--accent2)">Low overlap</td><td style="color:var(--danger)">High overlap</td><td>Significant co-occurrence</td></tr>
+        <tr><td>Overall At-Risk</td><td>Population share</td><td colspan="2">43.08% of all 50,000 students</td><td>21,539 students</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- DOWNLOADS -->
+<div id="downloads">
+  <div class="inner">
+    <div class="section-tag">Downloads</div>
+    <h2>Project Files & Repository</h2>
+    <p class="section-lead">Access all project materials — the interactive Power BI dashboard, raw and normalized dataset files, and the complete documentation report.</p>
+
+    <div class="download-grid">
+      <a href="Student Health_Dashboards.pbix" target="_blank" class="download-card">
+        <div class="download-icon">📊</div>
+        <span class="download-badge">Power BI</span>
+        <h4>Power BI Dashboard File</h4>
+        <p>Interactive .pbix file containing all 4 dashboard pages, star schema model, and all 26 DAX measures.</p>
+        <span class="dl-btn">↓ Download .pbix</span>
+      </a>
+
+      <a href="https://www.kaggle.com/datasets/ziya07/college-student-health-behavior-dataset?select=student_health_dataset_50k.csv" target="_blank" class="download-card">
+        <div class="download-icon">📁</div>
+        <span class="download-badge" style="background:rgba(245,158,11,0.1);color:#fcd34d;border-color:rgba(245,158,11,0.25);">Kaggle Repository</span>
+        <h4>Raw Dataset (CSV)</h4>
+        <p>Original <code>enhanced_student_health_dataset_50k.csv</code> — 50,000 records, 22 columns. Hosted on Kaggle.</p>
+        <span class="dl-btn">↓ View on Kaggle</span>
+      </a>
+
+      <a href="enhanced_student_health_dataset_50k.csv" target="_blank" class="download-card">
+        <div class="download-icon">📂</div>
+        <span class="download-badge" style="background:rgba(16,185,129,0.1);color:#6ee7b7;border-color:rgba(16,185,129,0.25);">Raw Data</span>
+        <h4>Raw Dataset (Local)</h4>
+        <p>Direct download of the raw student health CSV dataset before any preprocessing transformations.</p>
+        <span class="dl-btn">↓ Download Raw .csv</span>
+      </a>
+
+      <a href="Normalized_dataset.csv" target="_blank" class="download-card">
+        <div class="download-icon">🔢</div>
+        <span class="download-badge" style="background:rgba(139,92,246,0.1);color:#c4b5fd;border-color:rgba(139,92,246,0.25);">Normalized</span>
+        <h4>Normalized Dataset (CSV)</h4>
+        <p>Preprocessed and encoded version with ordinal encoding (Low=1, Medium=2, High=3) and normalized continuous variables.</p>
+        <span class="dl-btn">↓ Download Normalized .csv</span>
+      </a>
+
+      <a href="FInal-Project-Documentation.pdf" target="_blank" class="download-card">
+        <div class="download-icon">📑</div>
+        <span class="download-badge" style="background:rgba(239,68,68,0.1);color:#fca5a5;border-color:rgba(239,68,68,0.25);">Documentation</span>
+        <h4>Full PDF Report</h4>
+        <p>Printable PDF version of the complete Student Health Analytics documentation with all frameworks, data model, DAX measures, and findings.</p>
+        <span class="dl-btn">↓ Download .pdf</span>
+      </a>
+    </div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <p>
+    <strong>Student Health Analytics Dashboard</strong> &nbsp;·&nbsp;
+    Final Project — Bachelor of Science in Computer Science &nbsp;·&nbsp;
+    Tool: Microsoft Power BI Desktop
+  </p>
+  <p style="margin-top:0.5rem;">
+    Prepared by: <strong>Alenor A. Antap · Ellah Jane M. Mortel · Jason C. Montes · Joshua I. Bangit</strong> &nbsp;·&nbsp;
+    Instructor: Mrs. Marsha L. Superio
+  </p>
+  <p style="margin-top:0.5rem;">Dataset: College Student Health Behavior Dataset (Kaggle) · 50,000 Records · 22 Variables</p>
+</footer>
+
+<script>
+  const reveals = document.querySelectorAll('.reveal');
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach((e, i) => {
+      if (e.isIntersecting) {
+        setTimeout(() => e.target.classList.add('visible'), i * 60);
+        observer.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.08 });
+  reveals.forEach(el => observer.observe(el));
+</script>
+
+</body>
+</html>
